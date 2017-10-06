@@ -1,7 +1,7 @@
 Room room1 = new Room (
         roomid:1,
         title:"room 1",
-        description:"This is the lounge, when you come in, a receptionist waves at you, \"Good morning.\" There is also a TV showing the generic sports play, but you are far too busy for that."
+        description:"This is the lounge, when you come in, a receptionist waves at you, \"Good morning.\" There is also a TV showing the generic sports channel, but you are far too busy for that."
 )
 
 Room room2 = new Room (
