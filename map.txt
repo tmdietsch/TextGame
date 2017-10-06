@@ -1,0 +1,9 @@
+You start at room 1
+
+All rooms are disconnected unless otherwise noted
+
+Room 1 can connect to rooms 2, 3, and 5
+Room 2 can connect to room 1
+Room 3 can connect to rooms 1 and 4
+Room 4 can connect to room 3
+Room 5 can connect to room 1
