@@ -36,6 +36,8 @@ Map <Integer,Room> rooms = [
         5:room5,
 ]
 
+println "To quit enter \'q\'"
+
 Boolean keepPlaying = true
 while (keepPlaying) {
     //Defining user input
