@@ -28,56 +28,55 @@ Room room5 = new Room(
         description:"There is a lamp, just standing there, in the middle of an empty room. Odd.",
 )
 
-Map <String,Room> fRoom1 = [
-        "n":room2,
-        "w":room5,
-        "e":room3
-]
-
-Map <String,Room> fRoom2 = [
-        "s":room1
-]
-
-Map <String,Room> fRoom3 = [
-        "w":room1,
-        "s":room4
-]
-
-Map <String,Room> fRoom4 = [
-        "n":room3
-]
-
-Map <String,Room> fRoom5 = [
-        "e":room1
-]
+room1.connections = ["n":room2, "w":room5, "e":room3]
+room2.connections = ["s":room1]
+room3.connections = ["w":room1,"s":room4]
+room4.connections = ["n":room3]
+room5.connections = ["e":room1]
 
 println "To quit enter \'q\'"
-
+Room currentRoom = room1
 Boolean keepPlaying = true
+println()
+
 while (keepPlaying) {
     //Defining user input
-    println rooms.get(String)
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
-    println "Enter room number: "
+
+    println currentRoom.description
+    println "Exits: " + currentRoom.connections.keySet()
+
+    print "Enter a direction: "
     def userInput = br.readLine()
-    if (userInput == 'q') {
+    println()
+    if (userInput == "q") {
         //If the user enters 'q' then the game ends
         println "Good-bye"
         keepPlaying = false
+    } else if (userInput == "sv_cheats 1") {
+        println "I'm sorry, but your attempt to access cheats has been denied."
+        println()
+        println "You are currently in " + currentRoom.title
+    } else if (userInput.isInteger()) {
+        println "Please don't use a number."
+        println()
+        println "You are currently in " + currentRoom.title
     } else if (!userInput) {
         //If the user enters nothing then it asks for an integer
         println "You didn't type anything, try again."
+        println()
+        println "You are currently in " + currentRoom.title
     } else {
-        //Show user room information
-        Room room = rooms.get(userInput)
         //If the user enters a valid number, it goes to a room
         //If the user enters an invalid number, it doesn't go to a room
+        Room room = currentRoom.connections.get(userInput)
         if (room) {
-            println "Welcome to " + room.title
-            //println room.description
+            currentRoom = room
+            println "Welcome to " + currentRoom.title
         } else {
             println "Sorry, that is not a direction. Try again."
+            println()
+            println "You are currently in " + currentRoom.title
         }
     }
-
 }
