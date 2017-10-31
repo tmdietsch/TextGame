@@ -38,6 +38,7 @@ println "To quit enter \'q\'"
 Room currentRoom = room1
 Boolean keepPlaying = true
 println()
+println "Welcome to " + currentRoom.title
 
 while (keepPlaying) {
     //Defining user input
