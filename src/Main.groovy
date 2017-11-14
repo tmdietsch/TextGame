@@ -1,5 +1,3 @@
-import java.util.Random
-
 Npc lucy = new Npc(
         name:"Lucy the receptionist",
         isAggressive: false,
@@ -82,87 +80,103 @@ room3.connections = ["w":room1,"s":room4]
 room4.connections = ["n":room3]
 room5.connections = ["e":room1]
 
-//Defining user input
-BufferedReader bR = new BufferedReader(new InputStreamReader(System.in))
+Integer health = 100 //This is the player's health
+Room currentRoom = room1 //This is the current room that the player is in
+Boolean keepPlaying = true //This variable controls whether the player keeps on playing or not
+Scanner scanner = new Scanner(System.in) //Creates a scanner object, prompting the player to press a button to continue
+Room previousRoom = room1 //Creating a variable for the room that the player was previously in
+Random rand = new Random() //Creates a random object
+int max = 10 //This is the maximum number for the random number generator
+def randomIntegerList = [] //This is a list of random numbers created below
 
-def difficulty = true
-while (difficulty) {
-    println "Choose your difficulty. [Easy] [Medium] [Hard]"
-    def userInput1 = bR.readLine()
-    if (userInput1 == "Easy") {
-        def playerMultiplier = 10
-        difficulty = false
-    } else if (userInput1 == "Medium") {
-        def playerMultiplier = 5
-        difficulty = false
-    } else if (userInput1 == "Hard") {
-        def playerMultiplier = 2
-        difficulty = false
-    } else {
-        println "Please choose a difficulty."
-    }
-}
 println "To quit enter \'q\'"
-Integer health = 100
-Room currentRoom = room1
-Boolean keepPlaying = true
-Scanner scanner = new Scanner(System.in)
-def previousRoom
 println()
 println "Welcome to " + currentRoom.title
 
 while (keepPlaying) {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
-
-    Random rand = new Random() //Creates a random object
-    int max = 10 //This is the maximum number for the random number generator
-    def randomIntegerList = [] //This is a list of random numbers created below
-
     println currentRoom.description
-
-    //Fighting loops till the monster or the player is dead
+    if (health == 100) {
+        println "You are at full health!"
+    } else {
+        println "Your health is " + health + " out of 100"
+    }
+        //Fighting loops till the monster or the player is dead
     if (!currentRoom.npc.isAggressive) {
-        println currentRoom.npc.description
-    } else if (currentRoom.npc.isAggressive) {
-        (1..10).each {
-            randomIntegerList << rand.nextInt(max) + 1 //This creates a random number between 1 and 10
-        }
-        println currentRoom.npc.description
+        println currentRoom.npc.name + " says: " + currentRoom.npc.description
+    } else if (currentRoom.npc.isAggressive && currentRoom.npc.alive) {
+        println currentRoom.npc.name + " says: " + currentRoom.npc.description
         def keepFighting = true
         while (currentRoom.npc.alive && health > 0 && keepFighting) {
-            if (randomIntegerList % [0] == 1) {
+            (1..10).each {
+                randomIntegerList << rand.nextInt(max) + 1 //This creates a random number between 1 and 10
+            }
+            if (randomIntegerList%[0] == 1) {
+                //If the random number is odd, then the monster attacks
                 health = health - (randomIntegerList[1]*currentRoom.npc.multiplier)
-                println currentRoom.npc.name + " attacked. Your health is now " + health + "."
+
+                if (health <= 0) {
+                    println currentRoom.npc.name + " attacked"
+                    keepPlaying = false
+                } else {
+                    println currentRoom.npc.name + " attacked. Your health is now at " + health
+                }
+                print "Press any button to continue..."
                 scanner.nextLine()
-            } else if (randomIntegerList % [0] == 0) {
+            } else if (randomIntegerList%[0] == 0) {
+                //If the random number is even, the player has a choice to either attack or flee
                 println "Do you wish to attack or flee? [a] [f]"
                 def userInput = br.readLine()
                 if (userInput == "a") {
-                    currentRoom.npc.health = currentRoom.npc.health - (randomIntegerList[1] * playerMultiplier)
+                    //The player attacks
+                    currentRoom.npc.health = currentRoom.npc.health - (randomIntegerList[1] * currentRoom.npc.multiplier)
+                    println "You've inflicted ${randomIntegerList[1] * currentRoom.npc.multiplier} on " + currentRoom.npc.name
+
+                    if (currentRoom.npc.health < 0) {
+                        println "You have killed " + currentRoom.npc.name
+                        currentRoom.npc.alive = false
+                    } else {
+                        println currentRoom.npc.name + "'s health is now at " + currentRoom.npc.health
+                    }
+
+                    print "Press any button to continue..."
+                    scanner.nextLine()
+                    //The player gains health
+                    health = health + (randomIntegerList[2] * currentRoom.npc.multiplier)
+
+                    if (health >= 100) {
+                        println "You have maximum health"
+                        health = 100
+                    } else {
+                        println "You have gained health!"
+                        println "Your health is at " + health
+                    }
+
+                    print "Press any button to continue..."
+                    scanner.nextLine()
                 } else if (userInput == "f") {
                     println "You decided to flee."
                     currentRoom = previousRoom
                     println currentRoom.description
                     keepFighting = false
+                    print "Press any button to continue..."
                     scanner.nextLine()
                 }
             }
 
         }
-        println currentRoom.npc.name + " is dead."
+        if (!currentRoom.npc.alive) {
+            println currentRoom.npc.name + " is dead"
+        }
+    } else {
+        println currentRoom.npc.name + " is dead"
     }
-
-    if (health > 100) {
-        health = 100
-    } else if (health <= 0) {
-        keepPlaying = false
-    }
-
-    println "Exits: " + currentRoom.connections.keySet()
 
     if (!keepPlaying) {
         //This with exit the game if keepPlaying is false
+        println "You have been killed by " + currentRoom.npc.name
     } else {
+        println "Exits: " + currentRoom.connections.keySet()
         print "Enter a direction: "
         def userInput = br.readLine()
         println()
