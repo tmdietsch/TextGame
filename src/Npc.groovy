@@ -4,4 +4,5 @@ class Npc {
     Boolean isAggressive
     Integer multiplier
     String description
+    Boolean alive
 }

@@ -4,19 +4,21 @@ Npc lucy = new Npc(
         name:"Lucy the receptionist",
         isAggressive: false,
         description:"",
+        alive: true,
 )
 
 Room room1 = new Room(
         roomid:1,
         title:"room 1",
         description:"This is the lounge. There is a TV showing the generic sports channel, but you are far too busy for that.",
-        npc: lucy
+        npc: lucy,
 )
 
 Npc vendor = new Npc(
         name:"Josh",
         isAggressive: false,
         description:"",
+        alive: true,
 )
 
 Room room2 = new Room(
@@ -32,6 +34,7 @@ Npc chef = new Npc(
         isAggressive: true,
         multiplier: 3,
         description:"",
+        alive: true,
 )
 
 Room room3 = new Room(
@@ -47,6 +50,7 @@ Npc stinkyCheese = new Npc(
         isAggressive: true,
         multiplier: 5,
         description:"",
+        alive: true,
 )
 
 Room room4 = new Room(
@@ -62,6 +66,7 @@ Npc lamp = new Npc(
         isAggressive: true,
         multiplier: 4,
         description:"",
+        alive: true,
 )
 
 Room room5 = new Room(
@@ -77,67 +82,120 @@ room3.connections = ["w":room1,"s":room4]
 room4.connections = ["n":room3]
 room5.connections = ["e":room1]
 
+//Defining user input
+BufferedReader bR = new BufferedReader(new InputStreamReader(System.in))
+
+def difficulty = true
+while (difficulty) {
+    println "Choose your difficulty. [Easy] [Medium] [Hard]"
+    def userInput1 = bR.readLine()
+    if (userInput1 == "Easy") {
+        def playerMultiplier = 10
+        difficulty = false
+    } else if (userInput1 == "Medium") {
+        def playerMultiplier = 5
+        difficulty = false
+    } else if (userInput1 == "Hard") {
+        def playerMultiplier = 2
+        difficulty = false
+    } else {
+        println "Please choose a difficulty."
+    }
+}
 println "To quit enter \'q\'"
+Integer health = 100
 Room currentRoom = room1
 Boolean keepPlaying = true
+Scanner scanner = new Scanner(System.in)
+def previousRoom
 println()
 println "Welcome to " + currentRoom.title
 
 while (keepPlaying) {
+    BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
 
     Random rand = new Random() //Creates a random object
     int max = 10 //This is the maximum number for the random number generator
     def randomIntegerList = [] //This is a list of random numbers created below
-    (1..10).each {
-        randomIntegerList << rand.nextInt(max) + 1 //This creates a random number between 1 and 10
-    }
 
-    //Defining user input
-    BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
+    println currentRoom.description
 
+    //Fighting loops till the monster or the player is dead
     if (!currentRoom.npc.isAggressive) {
         println currentRoom.npc.description
     } else if (currentRoom.npc.isAggressive) {
+        (1..10).each {
+            randomIntegerList << rand.nextInt(max) + 1 //This creates a random number between 1 and 10
+        }
         println currentRoom.npc.description
-        if (randomIntegerList%[1] == 1) {
+        def keepFighting = true
+        while (currentRoom.npc.alive && health > 0 && keepFighting) {
+            if (randomIntegerList % [0] == 1) {
+                health = health - (randomIntegerList[1]*currentRoom.npc.multiplier)
+                println currentRoom.npc.name + " attacked. Your health is now " + health + "."
+                scanner.nextLine()
+            } else if (randomIntegerList % [0] == 0) {
+                println "Do you wish to attack or flee? [a] [f]"
+                def userInput = br.readLine()
+                if (userInput == "a") {
+                    currentRoom.npc.health = currentRoom.npc.health - (randomIntegerList[1] * playerMultiplier)
+                } else if (userInput == "f") {
+                    println "You decided to flee."
+                    currentRoom = previousRoom
+                    println currentRoom.description
+                    keepFighting = false
+                    scanner.nextLine()
+                }
+            }
 
         }
+        println currentRoom.npc.name + " is dead."
     }
 
-    println currentRoom.description
+    if (health > 100) {
+        health = 100
+    } else if (health <= 0) {
+        keepPlaying = false
+    }
+
     println "Exits: " + currentRoom.connections.keySet()
 
-    print "Enter a direction: "
-    def userInput = br.readLine()
-    println()
-    if (userInput == "q") {
-        //If the user enters 'q' then the game ends
-        println "Good-bye"
-        keepPlaying = false
-    } else if (userInput == "sv_cheats 1") {
-        println "I'm sorry, but your attempt to access cheats has been denied."
-        println()
-        println "You are currently in " + currentRoom.title
-    } else if (userInput.isInteger()) {
-        println "Please don't use a number."
-        println()
-        println "You are currently in " + currentRoom.title
-    } else if (!userInput) {
-        //If the user enters nothing then it asks for an integer
-        println "You didn't type anything, try again."
-        println()
-        println "You are currently in " + currentRoom.title
+    if (!keepPlaying) {
+        //This with exit the game if keepPlaying is false
     } else {
-        //If the user enters a valid number, it goes to a room
-        //If the user enters an invalid number, it doesn't go to a room
-        Room room = currentRoom.connections.get(userInput)
-        if (room) {
-            currentRoom = room
-            println "Welcome to " + currentRoom.title
-        } else {
-            println "Sorry, that is not a direction. Try again."
+        print "Enter a direction: "
+        def userInput = br.readLine()
+        println()
+        if (userInput == "q") {
+            //If the user enters 'q' then the game ends
+            println "Good-bye"
+            keepPlaying = false
+        } else if (userInput == "sv_cheats 1") {
+            println "I'm sorry, but your attempt to access cheats has been denied."
             println()
             println "You are currently in " + currentRoom.title
+        } else if (userInput.isInteger()) {
+            println "Please don't use a number."
+            println()
+            println "You are currently in " + currentRoom.title
+        } else if (!userInput) {
+            //If the user enters nothing then it asks for an integer
+            println "You didn't type anything, try again."
+            println()
+            println "You are currently in " + currentRoom.title
+        } else {
+            //If the user enters a valid number, it goes to a room
+            //If the user enters an invalid number, it doesn't go to a room
+            Room room = currentRoom.connections.get(userInput)
+            if (room) {
+                previousRoom = currentRoom
+                currentRoom = room
+                println "Welcome to " + currentRoom.title
+            } else {
+                println "Sorry, that is not a direction. Try again."
+                println()
+                println "You are currently in " + currentRoom.title
+            }
         }
     }
 }
