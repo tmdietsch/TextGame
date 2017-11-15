@@ -1,6 +1,5 @@
 Player player = new Player(
         health: 100,
-        multiplier: 0,
 )
 
 BufferedReader bR = new BufferedReader(new InputStreamReader(System.in))
@@ -8,6 +7,7 @@ BufferedReader bR = new BufferedReader(new InputStreamReader(System.in))
 println "What is your name?"
 player.name = bR.readLine()
 println "Welcome " + player.name
+println()
 
 Npc lucy = new Npc(
         name:"Lucy the receptionist",
@@ -17,8 +17,8 @@ Npc lucy = new Npc(
 )
 
 Room room1 = new Room(
-        title:"room 1",
-        description:"This is the lounge. The receptionist stands behind a wooden desk. There is also a TV showing the generic sports channel, but you are far too busy for that.",
+        title:"the lounge",
+        description:"The receptionist stands behind a wooden desk. There is also a TV showing the generic sports channel, but you are far too busy for that.",
         npc: lucy,
 )
 
@@ -51,7 +51,7 @@ Room room3 = new Room(
 )
 
 Npc stinkyCheese = new Npc(
-        health: 70,
+        health: 100,
         name:"Stinky Cheese",
         isAggressive: true,
         multiplier: 5,
@@ -66,7 +66,7 @@ Room room4 = new Room(
 )
 
 Npc lamp = new Npc(
-        health: 30,
+        health: 80,
         name:"Lamp",
         isAggressive: true,
         multiplier: 4,
@@ -81,7 +81,7 @@ Room room5 = new Room(
 )
 
 Npc gremlin = new Npc(
-        health: 10,
+        health: 15,
         name:"Mort",
         isAggressive: true,
         multiplier: 2,
@@ -96,9 +96,9 @@ Room room6 = new Room(
 )
 
 //Connections from one room to another
-room1.connections = ["n":room2, "w":room5, "e":room3]
-room2.connections = ["s":room1,"e":room6]
-room3.connections = ["w":room1,"s":room4]
+room1.connections = ["n":room2,"e":room3, "w":room5]
+room2.connections = ["e":room6,"s":room1]
+room3.connections = ["s":room4,"w":room1]
 room4.connections = ["n":room3]
 room5.connections = ["e":room1]
 room6.connections = ["w":room2]
@@ -164,6 +164,7 @@ while (keepPlaying) {
                     println currentRoom.npc.name + " attacked. Your health is now at " + player.health
                     print "Press the enter key to continue..."
                     scanner.nextLine()
+                    println()
                 }
             } else if (randomIntegerList[0] % 2 == 0) {
                 //If the random number is even, the player has a choice to either attack or flee
@@ -177,32 +178,41 @@ while (keepPlaying) {
                     if (currentRoom.npc.health <= 0) {
                         println "You have killed " + currentRoom.npc.name
                         currentRoom.npc.alive = false
+                        npcDeaths++
                     } else {
                         println currentRoom.npc.name + "'s health is now at " + currentRoom.npc.health
                     }
 
                     print "Press the enter key to continue..."
                     scanner.nextLine()
+                    println()
                     //The player gains health
-                    player.health = player.health + (randomIntegerList[2] * player.multiplier)
-
-                    if (player.health >= 100) {
+                    if (player.health == 100) {
                         println "You have maximum health"
                         player.health = 100
                     } else {
                         println "You have gained health!"
-                        println "Your health is at " + player.health
+                        player.health = player.health + (randomIntegerList[2] * player.multiplier)
+                        if (player.health > 100) {
+                            player.health = 100
+                        }
+                        println "Your health is now ${player.health} out of 100"
                     }
 
                     print "Press the enter key to continue..."
                     scanner.nextLine()
+                    println()
                 } else if (userInput == "f") {
                     println "You decided to flee."
                     currentRoom = previousRoom
                     println currentRoom.description
+                    if (!currentRoom.npc.isAggressive) {
+                        println currentRoom.npc.name + " says: " + currentRoom.npc.description
+                    }
                     keepFighting = false
                     print "Press the enter key to continue..."
                     scanner.nextLine()
+                    println()
                 } else if (userInput == "q") {
                     keepFighting = false
                     keepPlaying = false
@@ -212,14 +222,23 @@ while (keepPlaying) {
 
         }
         if (!currentRoom.npc.alive) {
-            println currentRoom.npc.name + " is dead"
+            println currentRoom.npc.name + " is now dead"
         }
     } else {
         println currentRoom.npc.name + " is dead"
     }
-
+    //End of fighting loop
     if (!keepPlaying) {
         //This with exit the game if keepPlaying is false
+/*    } else if () {
+        println "Congratulations ${player.name}! You have beaten all the monsters!"
+        println "You have been awarded: a light bulb, a knife, Roquefort, and a golden ring as trophies."
+        println "Have a great day!"
+        println()
+        print "Press the enter key to continue..."
+        scanner.nextLine()
+        keepPlaying = false
+*/
     } else {
         println "Exits: " + currentRoom.connections.keySet()
         print "Enter a direction: "
