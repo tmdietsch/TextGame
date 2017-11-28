@@ -1,5 +1,6 @@
 Player player = new Player(
         health: 100,
+        previousHealth: 100,
 )
 
 BufferedReader bR = new BufferedReader(new InputStreamReader(System.in))
@@ -45,6 +46,7 @@ Npc chef = new Npc(
         description:"Please be patient Lucy, dinner is almost...well hello there, you must be new in town. ${player.name}, wasn't it?",
         alive: true,
         overallDamage: 0,
+        attackNumber: 0,
 )
 
 Room room3 = new Room(
@@ -61,6 +63,7 @@ Npc stinkyCheese = new Npc(
         description:"Ha! You think you can just waltz in here and take all my cheese! Never!",
         alive: true,
         overallDamage: 0,
+        attackNumber: 0,
 )
 
 Room room4 = new Room(
@@ -77,6 +80,7 @@ Npc lamp = new Npc(
         description:"Hello. You must be ${player.name}. Welcome to my humble aboad.",
         alive: true,
         overallDamage: 0,
+        attackNumber: 0,
 )
 
 Room room5 = new Room(
@@ -93,6 +97,7 @@ Npc gremlin = new Npc(
         description:"Go away... go away! Leave me be!",
         alive: true,
         overallDamage: 0,
+        attackNumber: 0,
 )
 
 Room room6 = new Room(
@@ -140,7 +145,7 @@ Room currentRoom = room1 //This is the current room that the player is in
 Boolean keepPlaying = true //This variable controls whether the player keeps on playing or not
 Scanner scanner = new Scanner(System.in) //Creates a scanner object, prompting the player to press a button to continue
 Room previousRoom = room1 //Creating a variable for the room that the player was previously in
-Integer npcDeaths = 0
+Integer npcDeaths = 0 //The number of kills the player has accumulated
 
 println()
 println "To quit enter \'q\'"
@@ -166,7 +171,7 @@ while (keepPlaying) {
     if (currentRoom.npc.overallDamage > 0) {
         println "You have lost ${currentRoom.npc.overallDamage} health here"
     } else if (currentRoom.npc.overallDamage < 0) {
-        println "You have gained ${currentRoom.npc.overallDamage} health here"
+        println "You have gained ${currentRoom.npc.overallDamage * -1} health here"
     }
     if (!currentRoom.npc.isAggressive) {
         println currentRoom.npc.name + " says: " + currentRoom.npc.description
@@ -177,13 +182,13 @@ while (keepPlaying) {
             Random rand = new Random() //Creates a random object
             int max = 10 //This is the maximum number for the random number generator
             def randomIntegerList = [] //This is a list of random numbers created below
-            (1..10).each {
+            (1..5).each {
                 randomIntegerList << rand.nextInt(max) + 1 //This creates a random number between 1 and 10
             }
             if (randomIntegerList[0] % 2 == 1) {
                 //If the random number is odd, then the monster attacks
-                player.health = player.health - (randomIntegerList[1]*currentRoom.npc.multiplier)
-                currentRoom.npc.overallDamage = currentRoom.npc.overallDamage + (randomIntegerList[1]*currentRoom.npc.multiplier)
+                player.health = player.health - (randomIntegerList[1] * currentRoom.npc.multiplier)
+                currentRoom.npc.overallDamage = currentRoom.npc.overallDamage + (randomIntegerList[1] * currentRoom.npc.multiplier)
                 currentRoom.npc.attackNumber++
                 if (player.health <= 0) {
                     println currentRoom.npc.name + " attacked"
@@ -196,6 +201,7 @@ while (keepPlaying) {
                     scanner.nextLine()
                     println()
                 }
+                player.previousHealth = player.health
             } else if (randomIntegerList[0] % 2 == 0) {
                 //If the random number is even, the player has a choice to either attack or flee
                 boolean keepAnswer = true
@@ -222,7 +228,6 @@ while (keepPlaying) {
                         //The player gains health
                         if (player.health == 100) {
                             println "You have maximum health"
-                            player.health = 100
                         } else {
                             println "You have gained health!"
                             player.health = player.health + (randomIntegerList[2] * player.multiplier)
@@ -232,7 +237,7 @@ while (keepPlaying) {
                             println "Your health is now ${player.health} out of 100"
                         }
 
-                        currentRoom.npc.overallDamage = currentRoom.npc.overallDamage - (randomIntegerList[2] * player.multiplier)
+                        currentRoom.npc.overallDamage = currentRoom.npc.overallDamage + (player.previousHealth - player.health)
 
                         print "Press the enter key to continue..."
                         scanner.nextLine()
