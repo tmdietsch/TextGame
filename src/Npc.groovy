@@ -5,4 +5,6 @@ class Npc {
     Integer multiplier
     String description
     Boolean alive
+    Integer overallDamage
+    Integer attackNumber
 }
