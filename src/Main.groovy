@@ -1,6 +1,7 @@
 Player player = new Player(
         health: 100,
         previousHealth: 100,
+        keys: 0,
 )
 
 BufferedReader bR = new BufferedReader(new InputStreamReader(System.in))
@@ -22,20 +23,25 @@ Room room1 = new Room(
         title:"the lounge",
         description:"The receptionist stands behind a wooden desk. There is also a TV showing the generic sports channel, but you are far too busy for that.",
         npc: lucy,
+        locked: false,
 )
 
 Npc vendor = new Npc(
+        health: 30,
         name:"Josh",
-        isAggressive: false,
-        description:"Hey. Games are over there if you wish. Bathroom's in the corner.",
+        isAggressive: true,
+        multiplier: 3,
+        description:"Hey! Your not supposed to be here! Where's your identification?!",
         alive: true,
         overallDamage: 0,
+        attackNumber: 0,
 )
 
 Room room2 = new Room(
         title:"room 2",
         description:"You walk through the door, or maybe you teleported... I don't know but there are video games lining the walls if you are bored. Too bad there isn't an option to play them, in fact you can't even look at them. :(",
         npc: vendor,
+        locked: false,
 )
 
 Npc chef = new Npc(
@@ -53,10 +59,11 @@ Room room3 = new Room(
         title:"kitchen",
         description:"This is a normal kitchen, like the one at a stereotypical restaurant. Although you do smell something divine from the other room. Also there is pizza on the counter but you are allergic to yeast.",
         npc: chef,
+        locked: false,
 )
 
 Npc stinkyCheese = new Npc(
-        health: 100,
+        health: 150,
         name:"Stinky Cheese",
         isAggressive: true,
         multiplier: 5,
@@ -70,6 +77,7 @@ Room room4 = new Room(
         title:"Cheese Heaven",
         description:"You have arrived at the cheese room, filled with all sorts of cheese: Blue, Cheddar, American, Swiss, Camembert, Mozzarella, Roquefort, Manchego, Cotija, and so many more that you don't know the names to.",
         npc: stinkyCheese,
+        locked: true,
 )
 
 Npc lamp = new Npc(
@@ -87,11 +95,12 @@ Room room5 = new Room(
         title:"garage",
         description:"There is a lamp, just standing there, in the middle of an empty room. Odd.",
         npc: lamp,
+        locked: false,
 )
 
 Npc gremlin = new Npc(
         health: 15,
-        name:"Mort",
+        name:"Mort the Gremlin",
         isAggressive: true,
         multiplier: 2,
         description:"Go away... go away! Leave me be!",
@@ -104,6 +113,7 @@ Room room6 = new Room(
         title:"bathroom",
         description:"Welcome. Don't know why you came here, you already went earlier, remember?",
         npc: gremlin,
+        locked: false,
 )
 
 List<Npc> npcs = [lucy,vendor,chef,stinkyCheese,lamp,gremlin]
@@ -173,10 +183,18 @@ while (keepPlaying) {
     } else if (currentRoom.npc.overallDamage < 0) {
         println "You have gained ${currentRoom.npc.overallDamage * -1} health here"
     }
+
+    if (player.keys == 1) {
+        println "You have ${player.keys} key"
+    } else if (player.keys > 1) {
+        println "You have ${player.keys} keys"
+    }
+
+    //Beginning of Fighting Loop
     if (!currentRoom.npc.isAggressive) {
-        println currentRoom.npc.name + " says: " + currentRoom.npc.description
+        println "${currentRoom.npc.name} says: ${currentRoom.npc.description}"
     } else if (currentRoom.npc.isAggressive && currentRoom.npc.alive) {
-        println currentRoom.npc.name + " says: " + currentRoom.npc.description
+        println "${currentRoom.npc.name} says: ${currentRoom.npc.description}"
         def keepFighting = true
         while (currentRoom.npc.alive && player.health > 0 && keepFighting) { //Fighting loops till the monster is dead, the player is dead, or the player flees
             Random rand = new Random() //Creates a random object
@@ -218,6 +236,12 @@ while (keepPlaying) {
                             println "You have killed " + currentRoom.npc.name
                             currentRoom.npc.alive = false
                             npcDeaths++
+                            if (npcDeaths == count - 1) {
+                                println()
+                                println "You have found a key!"
+                                println()
+                                player.keys++
+                            }
                         } else {
                             println currentRoom.npc.name + "'s health is now at " + currentRoom.npc.health
                         }
@@ -264,7 +288,6 @@ while (keepPlaying) {
                     }
                 }
             }
-
         }
         if (!currentRoom.npc.alive) {
             println currentRoom.npc.name + " is now dead"
@@ -277,7 +300,7 @@ while (keepPlaying) {
         //This with exit the game if keepPlaying is false
     } else if (npcDeaths == count) {
         println()
-        println "Congratulations ${player.name}! You have beaten all the monsters!"
+        println "Congratulations ${player.name}! You have beaten ${currentRoom.npc.name}!"
         println "You have been awarded: a light bulb, a knife, Roquefort, a sock, and a golden ring as trophies."
         println "Have a great day!"
         println()
@@ -305,10 +328,18 @@ while (keepPlaying) {
             //If the user enters nothing then it asks for an integer
             println "You didn't type anything, try again."
             println()
-            println "You are currently in " + currentRoom.title
+            println "You are currently in ${currentRoom.title}"
+        } else if (currentRoom.connections.get(userInput).locked && player.keys == 0) {
+            println "That room is locked"
+            println()
+            println "You are currently in ${currentRoom.title}"
         } else {
             //If the user enters a valid number, it goes to a room
             //If the user enters an invalid number, it doesn't go to a room
+            if (currentRoom.connections.get(userInput).locked && player.keys > 0) {
+                println "You have used a key for the door."
+                player.keys--
+            }
             Room room = currentRoom.connections.get(userInput)
             if (room) {
                 previousRoom = currentRoom

@@ -3,4 +3,5 @@ class Player {
     Integer previousHealth
     Integer multiplier
     String name
+    Integer keys
 }
