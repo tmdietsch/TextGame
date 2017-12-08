@@ -38,7 +38,7 @@ Npc vendor = new Npc(
 )
 
 Room room2 = new Room(
-        title:"room 2",
+        title:"the arcade",
         description:"You walk through the door, or maybe you teleported... I don't know but there are video games lining the walls if you are bored. Too bad there isn't an option to play them, in fact you can't even look at them. :(",
         npc: vendor,
         locked: false,
